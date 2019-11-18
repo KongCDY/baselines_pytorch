@@ -21,6 +21,9 @@ class nature_cnn(nn.Module):
         super(nature_cnn, self).__init__()
         """
         CNN from Nature paper.
+
+        Args:
+        input_size: (H, W, C)
         """
         in_dim = input_size[-1]
         self.convs = nn.Sequential(
@@ -48,15 +51,75 @@ class nature_cnn(nn.Module):
         init_weight(self.fc[0], init_scale = np.sqrt(2.0))
 
     def forward(self, x):
-        x = x.transpose(2, 3).transpose(1, 2)
+        '''
+        Parameters:
+        ---------
+        x: (batch, h, w, c)
+        '''
+        x = x.transpose(2, 3).transpose(1, 2)  # convert to NCHW
         conv_out = self.convs(x / 255.)
         return self.fc(conv_out.view(conv_out.size(0), -1))
+
+class nature_mlp(nn.Module):
+    def __init__(self, input_size, num_layers=2, num_hidden=64, activation=nn.Tanh, layer_norm=False):
+        super(nature_mlp, self).__init__()
+        """
+        Stack of fully-connected layers to be used in a policy / q-function approximator
+        Parameters:
+        ----------
+        input_size: (int, )             input size, use env.observation_space.shape
+        num_layers: int                 number of fully-connected layers (default: 2)
+        num_hidden: int                 size of fully-connected layers (default: 64)
+        activation:                     activation function (default: nn.Tanh)
+
+        Returns:
+        -------
+        fully connected network model
+        """
+        in_dim = input_size[0]
+        self.out_dim = num_hidden
+        layers = []
+
+        layers.append(nn.Linear(in_dim, num_hidden))
+        if layer_norm:
+            layers.append(nn.LayerNorm(num_hidden))
+        layers.append(activation())
+
+        for i in range(1, num_layers):
+            layers.append(nn.Linear(num_hidden, num_hidden))
+            if layer_norm:
+                layers.append(nn.LayerNorm(num_hidden))
+            layers.append(activation())
+        self.layers = nn.Sequential(*layers)
+
+        # init
+        for m in self.modules():
+            init_weight(m, init_scale = np.sqrt(2.0))
+
+    def forward(self, x):
+        return self.layers(x)
 
 @register("cnn")
 def cnn(in_shape, **conv_kwargs):
     def network_fn():
         return nature_cnn(in_shape, **conv_kwargs)
     return network_fn()
+
+@register("mlp")
+def mlp(input_size, **mlp_kwargs):
+    """
+    Stack of fully-connected layers to be used in a policy / q-function approximator
+    Parameters:
+    ----------
+    input_size: (int, )             input size, use env.observation_space.shape
+    num_layers: int                 number of fully-connected layers (default: 2)
+    num_hidden: int                 size of fully-connected layers (default: 64)
+    activation:                     activation function (default: nn.Tanh)
+    Returns:
+    -------
+    function that builds fully connected network
+    """
+    return nature_mlp(input_size, **mlp_kwargs)
 
 def get_network_builder(name):
     """

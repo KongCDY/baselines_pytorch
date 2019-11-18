@@ -208,22 +208,23 @@ def main(args):
     model, env = train(args, extra_args)
 
     if args.save_path is not None and rank == 0:
-        save_path = osp.expanduser(args.save_path)
+        save_path = osp.join(osp.expanduser(args.save_path), 'model.pth')
         model.save(save_path)
 
     if args.play:
         logger.log("Running trained model")
+        from ptbaselines.algos.common.torch_utils import toNumpy, toTensor
         obs = env.reset()
 
-        state = model.initial_state if hasattr(model, 'initial_state') else None
+        state = None
         dones = np.zeros((1,))
 
         episode_rew = np.zeros(env.num_envs) if isinstance(env, VecEnv) else np.zeros(1)
         while True:
             if state is not None:
-                actions, _, state, _ = model.step(obs,S=state, M=dones)
+                actions, _, state, _ = toNumpy(model.step(toTensor(obs).float(), S=state, M=dones))
             else:
-                actions, _, _, _ = model.step(obs)
+                actions, _, _, _ = toNumpy(model.step(toTensor(obs).float()))
 
             obs, rew, done, _ = env.step(actions)
             episode_rew += rew

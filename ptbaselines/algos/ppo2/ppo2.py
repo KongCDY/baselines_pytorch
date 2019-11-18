@@ -85,6 +85,8 @@ def learn(*, network, env, total_timesteps, eval_env = None, seed=None, nsteps=2
     else: assert callable(cliprange)
     total_timesteps = int(total_timesteps)
 
+    import ipdb
+    ipdb.set_trace()
     policy = build_policy(env, network, **network_kwargs)
 
     # Get the nb of env
@@ -199,6 +201,7 @@ def learn(*, network, env, total_timesteps, eval_env = None, seed=None, nsteps=2
             logger.logkv("misc/nupdates", update)
             logger.logkv("misc/total_timesteps", update*nbatch)
             logger.logkv("fps", fps)
+            logger.logkv("batchsize", nbatch)
             logger.logkv("misc/explained_variance", float(ev))
             logger.logkv('eprewmean', safemean([epinfo['r'] for epinfo in epinfobuf]))
             logger.logkv('eplenmean', safemean([epinfo['l'] for epinfo in epinfobuf]))
@@ -213,7 +216,7 @@ def learn(*, network, env, total_timesteps, eval_env = None, seed=None, nsteps=2
         if save_interval and (update % save_interval == 0 or update == 1) and logger.get_dir() and is_mpi_root:
             checkdir = osp.join(logger.get_dir(), 'checkpoints')
             os.makedirs(checkdir, exist_ok=True)
-            savepath = osp.join(checkdir, '%.5i'%update)
+            savepath = osp.join(checkdir, '%.5i'%update) + '.pth'
             print('Saving to', savepath)
             model.save(savepath)
 

@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 import torch.distributions as distributions
 import numpy as np
+import math
 from ptbaselines.algos.common.torch_utils import init_weight
 
 class Pd(object):
@@ -75,6 +76,28 @@ class CategoricalPdType(PdType):
     def sample_dtype(self):
         return torch.int32
 
+class DiagGaussianPdType(PdType):
+    def __init__(self, in_dim, size, logstd = 0.0, init_scale = 1.0, init_bias = 0.0):
+        super(DiagGaussianPdType, self).__init__()
+        self.in_dim = in_dim
+        self.size = size 
+        self.fc = nn.Linear(in_dim, size)
+        self.logstd = torch.Tensor([[logstd]*size])  # first dim for batch
+        init_weight(self.fc, init_scale, init_bias)
+
+    def pdclass(self):
+        return DiagGaussianPd
+    def pdfromlatent(self, latent_vector):
+        mean = self.fc(latent_vector)
+        return self.pdfromflat([mean, self.logstd]), mean
+
+    def param_shape(self):
+        return [2*self.size]
+    def sample_shape(self):
+        return [self.size]
+    def sample_dtype(self):
+        return torch.float32
+
 class CategoricalPd(Pd):
     def __init__(self, logits):
         self.logits = logits
@@ -110,11 +133,33 @@ class CategoricalPd(Pd):
     def fromflat(cls, flat):
         return cls(flat)
 
+class DiagGaussianPd(Pd):
+    def __init__(self, params):
+        self.mean, self.logstd = params
+        self.std = torch.exp(self.logstd)
+        self._m = distributions.Normal(self.mean, self.std)
+    def flatparam(self):
+        return torch.cat([self.mean, self.std.expand(self.mean.size())], dim = -1)
+    def mode(self):
+        return self.mean
+    def neglogp(self, x):
+        return -self._m.log_prob(x).sum(dim = 1)
+    def kl(self, other):
+        assert isinstance(other, DiagGaussianPd)
+        return (other.logstd - self.logstd + (self.std**2 + (self.mean - other.mean)**2) / (2.0 * other.std**2) - 0.5).sum(dim = -1)
+    def entropy(self):
+        return (self.logstd + 0.5 * math.log(2.0 * math.pi * math.e)).sum(dim = -1)
+    def sample(self):
+        return self._m.sample()
+    @classmethod
+    def fromflat(cls, flat):
+        return cls(flat)
+
 def make_pdtype(in_dim, ac_space, init_scale = 1.0, init_bias = 0.0):
     from gym import spaces
     if isinstance(ac_space, spaces.Box):
         assert len(ac_space.shape) == 1
-        return DiagGaussianPdType(ac_space.shape[0])
+        return DiagGaussianPdType(in_dim, ac_space.shape[0], init_scale, init_bias)
     elif isinstance(ac_space, spaces.Discrete):
         return CategoricalPdType(in_dim, ac_space.n, init_scale, init_bias)
     elif isinstance(ac_space, spaces.MultiDiscrete):

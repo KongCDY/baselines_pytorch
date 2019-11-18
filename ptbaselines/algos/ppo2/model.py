@@ -1,4 +1,3 @@
-import functools
 import torch
 from torch.nn import functional as F
 from torch.nn.utils import clip_grad_norm_
@@ -42,13 +41,8 @@ class Model(object):
         self.initial_state = self.model.initial_state
 
         self.loss_names = ['policy_loss', 'value_loss', 'policy_entropy', 'approxkl', 'clipfrac']
-        # self.save = functools.partial(save_variables, sess=sess)
-        # self.load = functools.partial(load_variables, sess=sess)
-
-        # initialize()
-        # global_variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="")
-        # if MPI is not None:
-            # sync_from_root(sess, global_variables, comm=comm) #pylint: disable=E1101
+        self.save = self.model.save
+        self.load = self.model.load
 
     def train(self, lr, cliprange, obs, returns, masks, actions, values, old_neglogpacs, states=None):
         # Here we calculate advantage A(s,a) = R + yV(s') - V(s)
