@@ -9,7 +9,7 @@ def test_monitor():
 
     env = gym.make("CartPole-v1")
     env.seed(0)
-    mon_file = "/tmp/baselines-test-%s.monitor.csv" % uuid.uuid4()
+    mon_file = "/tmp/ptbaselines-test-%s.monitor.csv" % uuid.uuid4()
     menv = Monitor(env, mon_file)
     menv.reset()
     for _ in range(1000):

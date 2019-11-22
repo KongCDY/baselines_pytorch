@@ -139,3 +139,8 @@ def build_policy(env, policy_network, value_network=None,  normalize_observation
         return policy
 
     return policy_fn
+
+# def _normalize_clip_observation(x, clip_range=[-5.0, 5.0]):
+#     rms = RunningMeanStd(shape=x.shape[1:])  # mpi version
+#     norm_x = tf.clip_by_value((x - rms.mean) / rms.std, min(clip_range), max(clip_range))
+#     return norm_x, rms

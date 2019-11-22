@@ -85,8 +85,6 @@ def learn(*, network, env, total_timesteps, eval_env = None, seed=None, nsteps=2
     else: assert callable(cliprange)
     total_timesteps = int(total_timesteps)
 
-    import ipdb
-    ipdb.set_trace()
     policy = build_policy(env, network, **network_kwargs)
 
     # Get the nb of env

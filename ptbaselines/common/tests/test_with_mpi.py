@@ -19,7 +19,7 @@ def with_mpi(nproc=2, timeout=30, skip_if_no_mpi=True):
             subprocess.check_call([
                 'mpiexec','-n', str(nproc),
                 sys.executable,
-                '-m', 'baselines.common.tests.test_with_mpi',
+                '-m', 'ptbaselines.common.tests.test_with_mpi',
                 serialized_fn
             ], env=os.environ, timeout=timeout)
 

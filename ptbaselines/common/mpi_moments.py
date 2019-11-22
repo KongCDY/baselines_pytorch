@@ -1,6 +1,6 @@
 from mpi4py import MPI
 import numpy as np
-from baselines.common import zipsame
+from ptbaselines.common import zipsame
 
 
 def mpi_mean(x, axis=0, comm=None, keepdims=False):

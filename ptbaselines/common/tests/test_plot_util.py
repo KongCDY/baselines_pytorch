@@ -1,6 +1,6 @@
 # smoke tests of plot_util
-from baselines.common import plot_util as pu
-from baselines.common.tests.util import smoketest
+from ptbaselines.common import plot_util as pu
+from ptbaselines.common.tests.util import smoketest
 
 
 def test_plot_util():

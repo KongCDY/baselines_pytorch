@@ -105,7 +105,7 @@ def build_env(args):
         env = make_vec_env(env_id, env_type, args.num_env or 1, seed, reward_scale=args.reward_scale, flatten_dict_observations=flatten_dict_observations)
 
         if env_type == 'mujoco':
-            env = VecNormalize(env, use_tf=True)
+            env = VecNormalize(env)
 
     return env
 
@@ -240,6 +240,4 @@ def main(args):
     return model
 
 if __name__ == '__main__':
-    import ipdb
-    ipdb.set_trace()
     main(sys.argv)

@@ -1,8 +1,8 @@
 import numpy as np
 import tensorflow as tf
-from baselines.common import tf_util as U
-from baselines.common.tests.test_with_mpi import with_mpi
-from baselines import logger
+from ptbaselines.common import tf_util as U
+from ptbaselines.common.tests.test_with_mpi import with_mpi
+from ptbaselines import logger
 try:
     from mpi4py import MPI
 except ImportError:

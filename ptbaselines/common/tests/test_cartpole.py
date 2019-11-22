@@ -1,9 +1,9 @@
 import pytest
 import gym
 
-from baselines.run import get_learn_function
-from baselines.common.tests.util import reward_per_episode_test
-from baselines.common.tests import mark_slow
+from ptbaselines.run import get_learn_function
+from ptbaselines.common.tests.util import reward_per_episode_test
+from ptbaselines.common.tests import mark_slow
 
 common_kwargs = dict(
     total_timesteps=30000,

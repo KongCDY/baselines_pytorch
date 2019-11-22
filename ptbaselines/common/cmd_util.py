@@ -10,14 +10,14 @@ except ImportError:
 
 import gym
 from gym.wrappers import FlattenDictWrapper
-from baselines import logger
-from baselines.bench import Monitor
-from baselines.common import set_global_seeds
-from baselines.common.atari_wrappers import make_atari, wrap_deepmind
-from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
-from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
-from baselines.common import retro_wrappers
-from baselines.common.wrappers import ClipActionsWrapper
+from ptbaselines import logger
+from ptbaselines.bench import Monitor
+from ptbaselines.common import set_global_seeds
+from ptbaselines.common.atari_wrappers import make_atari, wrap_deepmind
+from ptbaselines.common.vec_env.subproc_vec_env import SubprocVecEnv
+from ptbaselines.common.vec_env.dummy_vec_env import DummyVecEnv
+from ptbaselines.common import retro_wrappers
+from ptbaselines.common.wrappers import ClipActionsWrapper
 
 def make_vec_env(env_id, env_type, num_env, seed,
                  wrapper_kwargs=None,
@@ -118,7 +118,7 @@ def make_mujoco_env(env_id, seed, reward_scale=1.0):
     env = Monitor(env, logger_path, allow_early_resets=True)
     env.seed(seed)
     if reward_scale != 1.0:
-        from baselines.common.retro_wrappers import RewardScaler
+        from ptbaselines.common.retro_wrappers import RewardScaler
         env = RewardScaler(env, reward_scale)
     return env
 

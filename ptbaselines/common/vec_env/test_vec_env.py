@@ -8,7 +8,7 @@ import pytest
 from .dummy_vec_env import DummyVecEnv
 from .shmem_vec_env import ShmemVecEnv
 from .subproc_vec_env import SubprocVecEnv
-from baselines.common.tests.test_with_mpi import with_mpi
+from ptbaselines.common.tests.test_with_mpi import with_mpi
 
 
 def assert_venvs_equal(venv1, venv2, num_steps):

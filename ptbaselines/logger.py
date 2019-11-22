@@ -320,7 +320,7 @@ class Logger(object):
         if self.comm is None:
             d = self.name2val
         else:
-            from baselines.common import mpi_util
+            from ptbaselines.common import mpi_util
             d = mpi_util.mpi_weighted_mean(self.comm,
                 {name : (val, self.name2cnt.get(name, 1))
                     for (name, val) in self.name2val.items()})

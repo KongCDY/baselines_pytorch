@@ -13,8 +13,8 @@ except BaseException:
 )
 def test_lstm_example():
     import tensorflow as tf
-    from baselines.common import policies, models, cmd_util
-    from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
+    from ptbaselines.common import policies, models, cmd_util
+    from ptbaselines.common.vec_env.dummy_vec_env import DummyVecEnv
 
     # create vectorized environment
     venv = DummyVecEnv([lambda: cmd_util.make_mujoco_env('Reacher-v2', seed=0)])

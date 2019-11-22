@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
+from ptbaselines.common.vec_env.dummy_vec_env import DummyVecEnv
 
 N_TRIALS = 10000
 N_EPISODES = 100
@@ -82,7 +82,7 @@ def smoketest(argstr, **kwargs):
     import tempfile
     import subprocess
     import os
-    argstr = 'python -m baselines.run ' + argstr
+    argstr = 'python -m ptbaselines.run ' + argstr
     for key, value in kwargs:
         argstr += ' --{}={}'.format(key, value)
     tempdir = tempfile.mkdtemp()
