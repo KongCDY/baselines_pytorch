@@ -172,6 +172,11 @@ def common_arg_parser():
     parser.add_argument('--save_video_length', help='Length of recorded video. Default: 200', default=200, type=int)
     parser.add_argument('--log_path', help='Directory to save learning curve data.', default=None, type=str)
     parser.add_argument('--play', default=False, action='store_true')
+    # for visdom
+    parser.add_argument('--viz_server', help='visdom server, default: http://localhost', type=str, default='http://localhost')
+    parser.add_argument('--viz_port', help='visdom port, default: 8097', type=int, default=8097)
+    # for device
+    parser.add_argument('--device', help='device: cpu, cuda:0, cuda:1, ...', type=str, default='cpu')
     return parser
 
 def robotics_arg_parser():

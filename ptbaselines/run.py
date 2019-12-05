@@ -11,6 +11,7 @@ from ptbaselines.common.vec_env.vec_video_recorder import VecVideoRecorder
 from ptbaselines.common.cmd_util import common_arg_parser, parse_unknown_args, make_vec_env, make_env
 from ptbaselines import logger
 from importlib import import_module
+from ptbaselines.algos.common import torch_utils
 
 try:
     from mpi4py import MPI
@@ -186,7 +187,7 @@ def parse_cmdline_kwargs(args):
 
 def configure_logger(log_path, **kwargs):
     if log_path is not None:
-        logger.configure(log_path)
+        logger.configure(log_path, **kwargs)
     else:
         logger.configure(**kwargs)
 
@@ -197,13 +198,14 @@ def main(args):
     arg_parser = common_arg_parser()
     args, unknown_args = arg_parser.parse_known_args(args)
     extra_args = parse_cmdline_kwargs(unknown_args)
+    torch_utils.device = args.device
 
     if MPI is None or MPI.COMM_WORLD.Get_rank() == 0:
         rank = 0
-        configure_logger(args.log_path)
+        configure_logger(args.log_path, viz_server = args.viz_server, viz_port = args.viz_port)
     else:
         rank = MPI.COMM_WORLD.Get_rank()
-        configure_logger(args.log_path, format_strs=[])
+        configure_logger(args.log_path, format_strs=[], viz_server = args.viz_server, viz_port = args.viz_port)
 
     model, env = train(args, extra_args)
 

@@ -8,6 +8,8 @@ import datetime
 import tempfile
 from collections import defaultdict
 from contextlib import contextmanager
+from visdom import Visdom
+import numpy as np
 
 DEBUG = 10
 INFO = 20
@@ -198,6 +200,12 @@ def logkv(key, val):
     """
     get_current().logkv(key, val)
 
+def vizkv(key, x, val):
+    """
+    plot a value of key using visdom
+    """
+    get_current().vizkv(key, x, val)
+
 def logkv_mean(key, val):
     """
     The same as logkv(), but if called many times, values averaged.
@@ -298,13 +306,15 @@ class Logger(object):
                     # So that you can still log to the terminal without setting up any output files
     CURRENT = None  # Current logger being used by the free functions above
 
-    def __init__(self, dir, output_formats, comm=None):
+    def __init__(self, dir, output_formats, comm=None, viz = None):
         self.name2val = defaultdict(float)  # values this iteration
         self.name2cnt = defaultdict(int)
         self.level = INFO
         self.dir = dir
         self.output_formats = output_formats
         self.comm = comm
+        self.viz = viz
+        self.wins = {}
 
     # Logging API, forwarded
     # ----------------------------------------
@@ -337,6 +347,13 @@ class Logger(object):
     def log(self, *args, level=INFO):
         if self.level <= level:
             self._do_log(args)
+    
+    def vizkv(self, key, x, val):
+        if key in self.wins:
+            self.viz.line(X = np.array([x]), Y = np.array([val]), update = 'append', win = self.wins[key])
+        else:
+            self.wins[key] = self.viz.line(X=np.array([x]), Y=np.array([val]), opts=dict(xlabel='update', ylabel='val', title=key, markers = False))
+            
 
     # Configuration
     # ----------------------------------------
@@ -369,7 +386,7 @@ def get_rank_without_mpi_import():
     return 0
 
 
-def configure(dir=None, format_strs=None, comm=None, log_suffix=''):
+def configure(dir=None, format_strs=None, comm=None, log_suffix='', viz_server = 'http://localhost', viz_port = 8097):
     """
     If comm is provided, average all numerical stats across that comm
     """
@@ -394,7 +411,8 @@ def configure(dir=None, format_strs=None, comm=None, log_suffix=''):
     format_strs = filter(None, format_strs)
     output_formats = [make_output_format(f, dir, log_suffix) for f in format_strs]
 
-    Logger.CURRENT = Logger(dir=dir, output_formats=output_formats, comm=comm)
+    viz = Visdom(server = viz_server, port = viz_port, env = osp.basename(dir))
+    Logger.CURRENT = Logger(dir=dir, output_formats=output_formats, comm=comm, viz = viz)
     if output_formats:
         log('Logging to %s'%dir)
 

@@ -6,7 +6,7 @@ import copy
 from ptbaselines.common.mpi_running_mean_std import RunningMeanStd
 from ptbaselines.algos.common.distributions import make_pdtype
 from ptbaselines.algos.common.models import get_network_builder
-from ptbaselines.algos.common.torch_utils import init_weight
+from ptbaselines.algos.common import torch_utils
 
 import gym
 
@@ -44,7 +44,7 @@ class PolicyWithValue(nn.Module):
             self.vf = nn.Linear(self.latent.out_dim, 1)
 
         # init weight
-        init_weight(self.vf)
+        torch_utils.init_weight(self.vf)
 
     def action(self, obs):
         l_out = self.latent(obs)
@@ -136,6 +136,7 @@ def build_policy(env, policy_network, value_network=None,  normalize_observation
             estimate_q=estimate_q,
             **extra_tensors
         )
+        policy.to(torch_utils.device)
         return policy
 
     return policy_fn

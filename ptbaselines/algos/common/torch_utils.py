@@ -3,6 +3,8 @@ import torch.nn as nn
 from torch.nn import init
 from collections.abc import Generator
 
+device = 'cpu'
+
 def init_weight(m, init_scale = 1.0, init_bias = 0.0):
     if isinstance(m, nn.Linear):
         init.orthogonal_(m.weight.data, init_scale)
@@ -16,9 +18,9 @@ def toTensor(arrs):
     arrs: a list of numpy array
     '''
     if isinstance(arrs, (list, tuple, Generator)):
-        return [torch.from_numpy(arr) for arr in arrs]
+        return [torch.from_numpy(arr).to(device) for arr in arrs]
     else:
-        return torch.from_numpy(arrs)
+        return torch.from_numpy(arrs).to(device)
 
 def toNumpy(tensors):
     '''
