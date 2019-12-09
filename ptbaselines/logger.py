@@ -352,7 +352,7 @@ class Logger(object):
         if key in self.wins:
             self.viz.line(X = np.array([x]), Y = np.array([val]), update = 'append', win = self.wins[key])
         else:
-            self.wins[key] = self.viz.line(X=np.array([x]), Y=np.array([val]), opts=dict(xlabel='update', ylabel='val', title=key, markers = False))
+            self.wins[key] = self.viz.line(X=np.array([x]), Y=np.array([val]), opts=dict(xlabel='timestep', ylabel='val', title=key, markers = False))
             
 
     # Configuration

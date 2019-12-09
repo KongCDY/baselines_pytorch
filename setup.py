@@ -37,7 +37,8 @@ setup(name='ptbaselines',
           'joblib',
           'cloudpickle',
           'click',
-          'opencv-python'
+          'opencv-python',
+          'visdom'
       ],
       extras_require=extras,
       description='Pytorch version of OpenAI baselines: high quality implementations of reinforcement learning algorithms',

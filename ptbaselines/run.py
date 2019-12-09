@@ -1,6 +1,7 @@
 import sys
 import re
 import multiprocessing
+import os
 import os.path as osp
 import gym
 from collections import defaultdict
@@ -210,6 +211,7 @@ def main(args):
     model, env = train(args, extra_args)
 
     if args.save_path is not None and rank == 0:
+        os.makedirs(osp.expanduser(args.save_path), exist_ok=True)
         save_path = osp.join(osp.expanduser(args.save_path), 'model.pth')
         model.save(save_path)
 

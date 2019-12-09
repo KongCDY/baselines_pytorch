@@ -98,10 +98,10 @@ class PolicyWithValue(nn.Module):
         return v.squeeze(-1)
 
     def save(self, save_path):
-        torch.save(self.state_dict, save_path)
+        torch.save(self.state_dict(), save_path)
 
     def load(self, load_path):
-        self.load_state_dict(torch.load(load_path))
+        self.load_state_dict(torch.load(load_path, map_location=lambda storage, loc: storage))
 
 def build_policy(env, policy_network, value_network=None,  normalize_observations=False, estimate_q=False, **policy_kwargs):
     if isinstance(policy_network, str):

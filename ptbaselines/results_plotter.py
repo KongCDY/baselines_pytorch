@@ -5,7 +5,7 @@ matplotlib.use('TkAgg') # Can change to 'Agg' for non-interactive mode
 import matplotlib.pyplot as plt
 plt.rcParams['svg.fonttype'] = 'none'
 
-from baselines.common import plot_util
+from ptbaselines.common import plot_util
 
 X_TIMESTEPS = 'timesteps'
 X_EPISODES = 'episodes'
@@ -45,6 +45,11 @@ def ts2xy(ts, xaxis, yaxis):
         raise NotImplementedError
     return x, y
 
+def pr2xy(ts):
+    x = ts.get('eprewmean').values
+    y = ts.get('misc/total_timesteps').values
+    return x, y
+
 def plot_curves(xy_list, xaxis, yaxis, title):
     fig = plt.figure(figsize=(8,2))
     maxx = max(xy[0][-1] for xy in xy_list)
@@ -64,14 +69,18 @@ def plot_curves(xy_list, xaxis, yaxis, title):
 
 
 def split_by_task(taskpath):
-    return taskpath['dirname'].split('/')[-1].split('-')[0]
+    return taskpath.dirname.split('/')[-1].split('-')[0]
 
 def plot_results(dirs, num_timesteps=10e6, xaxis=X_TIMESTEPS, yaxis=Y_REWARD, title='', split_fn=split_by_task):
-    results = plot_util.load_results(dirs)
-    plot_util.plot_results(results, xy_fn=lambda r: ts2xy(r['monitor'], xaxis, yaxis), split_fn=split_fn, average_group=True, resample=int(1e6))
+    results = plot_util.load_results(dirs, enable_progress=True)
+    # plot_util.plot_results(results, xy_fn=lambda r: ts2xy(r.monitor, xaxis, yaxis), split_fn=split_fn, average_group=True, resample=int(1e6))
+    plot_util.plot_results(results, xy_fn=lambda r: ts2xy(r.monitor, xaxis, yaxis), split_fn=split_fn, average_group=True, resample=0)
+
+    # for progress
+    # plot_util.plot_results(results, xy_fn=lambda r: pr2xy(r.progress), split_fn=split_fn, average_group=True, resample=0)
 
 # Example usage in jupyter-notebook
-# from baselines.results_plotter import plot_results
+# from ptbaselines.results_plotter import plot_results
 # %matplotlib inline
 # plot_results("./log")
 # Here ./log is a directory containing the monitor.csv files
@@ -91,4 +100,8 @@ def main():
     plt.show()
 
 if __name__ == '__main__':
+    # results = plot_util.load_results('/home/sora/tmp/baselines_test')
+    # r = results[0]
+    # plt.plot(np.cumsum(r.monitor.l), r.monitor.r)
+    # plt.show()
     main()
