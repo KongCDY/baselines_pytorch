@@ -4,29 +4,30 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        // {
-        //     "name": "Python: Module",
-        //     "type": "python",
-        //     "request": "launch",
-        //     "module": "ptbaselines.run",
-        //     "args": [
-        //         "--alg", "ppo2",
-        //         "--env", "PongNoFrameskip-v4",
-        //         "--num_timesteps", "1e6",
-        //         "--log_path", "/home/sora/tmp/baselines_test",
-        //         "--save_path", "/home/sora/tmp/baselines_test"
-        //     ]
-        // },
-
         {
             "name": "Python: Module",
             "type": "python",
             "request": "launch",
-            "module": "ptbaselines.results_plotter",
+            "module": "ptbaselines.run",
             "args": [
-                "--dir", "/home/sora/tmp/baselines_test",
+                "--alg", "a2c",
+                "--env", "PongNoFrameskip-v4",
+                "--num_timesteps", "1e7",
+                "--log_path", "/home/sora/tmp/baselines_test",
+                "--save_path", "/home/sora/tmp/baselines_test"
             ]
         },
+
+        // {
+        //     "name": "Python: Module",
+        //     "type": "python",
+        //     "request": "launch",
+        //     "module": "ptbaselines.results_plotter",
+        //     "args": [
+        //         "--dir", "/home/sora/tmp/baselines_test",
+        //         "--task_name", "Pong"
+        //     ]
+        // },
 
         {
             "name": "Python: Current File",
@@ -40,7 +41,7 @@
                 "--env",
                 "PongNoFrameskip-v4",
                 "--num_timesteps",
-                "1e6"
+                "1e7"
             ]
         }
     ]

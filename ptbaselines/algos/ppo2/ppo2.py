@@ -12,6 +12,7 @@ except ImportError:
     MPI = None
 from ptbaselines.algos.ppo2.runner import Runner
 from ptbaselines.algos.common import torch_utils
+from ptbaselines.algos.common.torch_utils import safemean
 
 def constfn(val):
     def f(_):
@@ -209,8 +210,8 @@ def learn(*, network, env, total_timesteps, eval_env = None, seed=None, nsteps=2
             logger.logkv('misc/time_elapsed', tnow - tfirststart)
             for (lossval, lossname) in zip(lossvals, model.loss_names):
                 logger.logkv('loss/' + lossname, lossval)
-
             logger.dumpkvs()
+
             # plot using visdom
             timesteps = update*nbatch
             logger.vizkv('eprewmean', timesteps, safemean([epinfo['r'] for epinfo in epinfobuf]))
@@ -226,9 +227,5 @@ def learn(*, network, env, total_timesteps, eval_env = None, seed=None, nsteps=2
             model.save(savepath)
 
     return model
-# Avoid division error when calculate the mean (in our case if epinfo is empty returns np.nan, not return an error)
-def safemean(xs):
-    return np.nan if len(xs) == 0 else np.mean(xs)
-
 
 

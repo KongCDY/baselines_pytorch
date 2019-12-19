@@ -90,7 +90,7 @@ class Model(object):
         # Total loss
         loss = pg_loss - entropy * self.ent_coef + vf_loss * self.vf_coef
 
-	# UPDATE THE PARAMETERS USING LOSS
+        # UPDATE THE PARAMETERS USING LOSS
         for param_group in self.optimizer.param_groups:
             param_group['lr'] = lr
         self.optimizer.zero_grad()

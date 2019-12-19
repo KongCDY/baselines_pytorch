@@ -76,8 +76,13 @@ def plot_results(dirs, num_timesteps=10e6, xaxis=X_TIMESTEPS, yaxis=Y_REWARD, ti
     # plot_util.plot_results(results, xy_fn=lambda r: ts2xy(r.monitor, xaxis, yaxis), split_fn=split_fn, average_group=True, resample=int(1e6))
     plot_util.plot_results(results, xy_fn=lambda r: ts2xy(r.monitor, xaxis, yaxis), split_fn=split_fn, average_group=True, resample=0)
 
-    # for progress
-    # plot_util.plot_results(results, xy_fn=lambda r: pr2xy(r.progress), split_fn=split_fn, average_group=True, resample=0)
+def simple_plot_progress(dir, task_name):
+    results = plot_util.load_results(dir, enable_monitor=False)
+    r = results[0]
+    plt.grid(True)
+    plt.title(task_name)
+    plt.plot(r.progress.get('misc/total_timesteps'), r.progress.get('eprewmean'))
+    plt.show()
 
 # Example usage in jupyter-notebook
 # from ptbaselines.results_plotter import plot_results
@@ -96,7 +101,8 @@ def main():
     parser.add_argument('--task_name', help = 'Title of plot', default = 'Breakout')
     args = parser.parse_args()
     args.dirs = [os.path.abspath(dir) for dir in args.dirs]
-    plot_results(args.dirs, args.num_timesteps, args.xaxis, args.yaxis, args.task_name)
+    # plot_results(args.dirs, args.num_timesteps, args.xaxis, args.yaxis, args.task_name)
+    simple_plot_progress(args.dirs, args.task_name)
     plt.show()
 
 if __name__ == '__main__':

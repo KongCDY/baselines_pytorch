@@ -231,6 +231,7 @@ def main(args):
                 actions, _, _, _ = toNumpy(model.step(toTensor(obs).float()))
 
             obs, rew, done, _ = env.step(actions)
+            # print('rewards: {}'.format(rew))
             episode_rew += rew
             env.render()
             done_any = done.any() if isinstance(done, np.ndarray) else done
