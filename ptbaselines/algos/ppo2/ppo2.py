@@ -227,5 +227,3 @@ def learn(*, network, env, total_timesteps, eval_env = None, seed=None, nsteps=2
             model.save(savepath)
 
     return model
-
-

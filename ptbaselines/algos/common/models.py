@@ -60,6 +60,41 @@ class nature_cnn(nn.Module):
         conv_out = self.convs(x / 255.)
         return self.fc(conv_out.view(conv_out.size(0), -1))
 
+class cnn_convs_only(nn.Module):
+    """
+    only convs
+
+    Args:
+    input_size: (H, W, C)
+    convs: list of triples (filter_number, filter_size, stride) specifying parameters for each layer.
+    """
+    def __init__(self, input_size, convs, **conv_kwargs):
+        super(cnn_convs_only, self).__init__()
+        in_dim = input_size[-1]
+        layers = []
+        for num_outputs, kernel_size, stride in convs:
+            layers.append(nn.Conv2d(in_dim, num_outputs, kernel_size = kernel_size, stride = stride))
+            layers.append(nn.ReLU())
+            in_dim = num_outputs
+        self.convs = nn.Sequential(*layers)
+        x = torch.zeros((1, *input_size))
+        out = self.forward(x).view(1, -1)
+        self.out_dim = out.size(1)
+
+        # init
+        for m in self.modules():
+            init_weight(m, **conv_kwargs)
+   
+    def forward(self, x):
+        '''
+        Parameters:
+        ---------
+        x: (batch, h, w, c)
+        '''
+        x = x.transpose(2, 3).transpose(1, 2)  # convert to NCHW
+        conv_out = self.convs(x / 255.)
+        return conv_out
+
 class nature_mlp(nn.Module):
     def __init__(self, input_size, num_layers=2, num_hidden=64, activation=nn.Tanh, layer_norm=False):
         super(nature_mlp, self).__init__()
@@ -104,6 +139,10 @@ def cnn(in_shape, **conv_kwargs):
     def network_fn():
         return nature_cnn(in_shape, **conv_kwargs)
     return network_fn()
+
+@register("conv_only")
+def conv_only(in_shape, convs = [(32, 8, 4), (64, 4, 2), (64, 3, 1)], **conv_kwargs):
+    return cnn_convs_only(in_shape, convs, **conv_kwargs)
 
 @register("mlp")
 def mlp(input_size, **mlp_kwargs):

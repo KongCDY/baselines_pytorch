@@ -81,9 +81,11 @@ def simple_plot_progress(dir, task_name):
     r = results[0]
     plt.grid(True)
     plt.title(task_name)
-    plt.plot(r.progress.get('misc/total_timesteps'), r.progress.get('eprewmean'))
-    plt.show()
-
+    try:
+        plt.plot(r.progress.get('misc/total_timesteps'), r.progress.get('eprewmean'))
+    except:
+        plt.plot(r.progress.get('total_timesteps'), r.progress.get('eprewmean'))
+   
 # Example usage in jupyter-notebook
 # from ptbaselines.results_plotter import plot_results
 # %matplotlib inline

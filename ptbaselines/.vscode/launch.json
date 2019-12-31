@@ -10,11 +10,12 @@
             "request": "launch",
             "module": "ptbaselines.run",
             "args": [
-                "--alg", "a2c",
+                "--alg", "deepq",
                 "--env", "PongNoFrameskip-v4",
                 "--num_timesteps", "1e7",
                 "--log_path", "/home/sora/tmp/baselines_test",
-                "--save_path", "/home/sora/tmp/baselines_test"
+                "--save_path", "/home/sora/tmp/baselines_test",
+                "--learning_starts", "100"
             ]
         },
 

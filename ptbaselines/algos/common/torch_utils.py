@@ -88,3 +88,15 @@ class Scheduler(object):
 
     def value_steps(self, steps):
         return self.v*self.schedule(steps/self.nvalues)
+
+# ================================================================
+# Mathematical utils
+# ================================================================
+
+def huber_loss(x, delta=1.0):
+    """Reference: https://en.wikipedia.org/wiki/Huber_loss"""
+    return torch.where(
+        torch.abs(x) < delta,
+        torch.pow(x, 2) * 0.5,
+        delta * (torch.abs(x) - 0.5 * delta)
+    )

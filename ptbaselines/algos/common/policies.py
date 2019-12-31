@@ -102,6 +102,7 @@ class PolicyWithValue(nn.Module):
 
     def load(self, load_path):
         self.load_state_dict(torch.load(load_path, map_location=lambda storage, loc: storage))
+        self.to(torch_utils.device)
 
 def build_policy(env, policy_network, value_network=None,  normalize_observations=False, estimate_q=False, **policy_kwargs):
     if isinstance(policy_network, str):
