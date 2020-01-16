@@ -2,12 +2,13 @@ import gym
 import numpy as np
 from ptbaselines.algos import deepq
 from ptbaselines.algos.common import torch_utils
+from ptbaselines.common.atari_wrappers import make_atari
 
 
 def main():
-    env = gym.make("PongNoFrameskip-v4")
+    env = make_atari("PongNoFrameskip-v4")
     env = deepq.wrap_atari_dqn(env)
-    model = deepq.learn(
+    act = deepq.learn(
         env,
         "conv_only",
         convs=[(32, 8, 4), (64, 4, 2), (64, 3, 1)],

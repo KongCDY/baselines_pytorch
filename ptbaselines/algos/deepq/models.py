@@ -79,6 +79,13 @@ class QNet(nn.Module):
         else:
             return deterministic_actions
 
+def default_param_noise_filter(m):
+    # The remaining layers are likely conv or layer norm layers, which we do not wish to
+    # perturb (in the former case because they only extract features, in the latter case because
+    # we use them for normalization purposes). If you change your network, you will likely want
+    # to re-consider which layers to perturb and which to keep untouched.
+    return isinstance(m, nn.Linear)
+
 class Model(object):
     def __init__(self, *, qnet, lr, grad_norm_clipping=None, gamma=1.0,
                 double_q=True, param_noise=False, param_noise_filter_func=None):
@@ -97,9 +104,48 @@ class Model(object):
         self.param_noise_filter_func = param_noise_filter_func
 
         self.optimizer = optim.Adam(self.qnet.parameters(), lr = lr)
-    
+
+        if param_noise:
+            if self.param_noise_filter_func is None:
+                self.param_noise_filter_func = default_param_noise_filter
+            self.param_noise_scale = 0.01
+            self.adaptive_qnet = copy.deepcopy(qnet)
+            self.pertubed_qnet = copy.deepcopy(qnet)
+            self.adaptive_qnet.to(torch_utils.device)
+            self.pertubed_qnet.to(torch_utils.device)
+            for param in self.adaptive_qnet.parameters():
+                param.requires_grad = False
+            for param in self.pertubed_qnet.parameters():
+                param.requires_grad = False
+ 
     def actions(self, obs, eps = 0, stochastic = True):
         return self.qnet.sample_actions(obs, eps, stochastic)
+    
+    def actions_with_param_noise(self, obs, eps = 0, reset = False, stochastic = True):
+        if reset:
+            self.perturb_params(self.qnet, self.pertubed_qnet)
+        return self.pertubed_qnet.sample_actions(obs, eps, stochastic)
+
+    def perturb_params(self, src_net, dst_net):
+        params = parameters_to_vector(src_net.parameters())
+        vector_to_parameters(params, dst_net.parameters())
+        for m in dst_net.modules():
+            if self.param_noise_filter_func(m):
+                for param in m.parameters():
+                    param.data += torch.randn_like(param.data) * self.param_noise_scale
+
+    def update_noise_scale(self, obs, param_noise_threshold = 0.05):
+        # perturb adaptive qnet
+        self.perturb_params(self.qnet, self.adaptive_qnet)
+        with torch.no_grad():
+            q_values = self.qnet(obs)
+            q_values_adaptive = self.adaptive_qnet(obs)
+        kl = torch.sum(F.softmax(q_values, -1) * (torch.log(F.softmax(q_values, -1)) - torch.log(F.softmax(q_values_adaptive, -1))), dim = -1)
+        mean_kl = kl.mean()
+        if mean_kl < param_noise_threshold:
+            self.param_noise_scale *= 1.01
+        else:
+            self.param_noise_scale /= 1.01
     
     def update_target(self):
         params = parameters_to_vector(self.qnet.parameters())

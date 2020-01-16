@@ -5,6 +5,8 @@ import shutil
 import subprocess
 import warnings
 import sys
+import torch
+from torch.nn.utils import vector_to_parameters, parameters_to_vector
 
 try:
     from mpi4py import MPI
@@ -12,18 +14,43 @@ except ImportError:
     MPI = None
 
 
-def sync_from_root(sess, variables, comm=None):
+def sync_from_root(params, comm=None):
     """
     Send the root node's parameters to every worker.
     Arguments:
-      sess: the TensorFlow session.
-      variables: all parameter variables including optimizer's
+      params: all parameter variables including optimizer's
     """
     if comm is None: comm = MPI.COMM_WORLD
-    import tensorflow as tf
-    values = comm.bcast(sess.run(variables))
-    sess.run([tf.assign(var, val)
-        for (var, val) in zip(variables, values)])
+    data = parameters_to_vector(params).detach().numpy()
+    comm.Bcast(data, root=0)
+    vector_to_parameters(torch.from_numpy(data), params)
+
+def average_gradients(param_groups):
+    for param_group in param_groups:
+        for p in param_group['params']:
+            if p.requires_grad:
+                p.grad.data.copy_(torch.Tensor(mpi_avg(p.grad.data.numpy())))
+
+def mpi_op(x, op):
+    x, scalar = ([x], True) if np.isscalar(x) else (x, False)
+    x = np.asarray(x, dtype=np.float32)
+    buff = np.zeros_like(x, dtype=np.float32)
+    allreduce(x, buff, op=op)
+    return buff[0] if scalar else buff
+
+def allreduce(*args, **kwargs):
+    return MPI.COMM_WORLD.Allreduce(*args, **kwargs)
+
+def num_procs():
+    """Count active MPI processes."""
+    return MPI.COMM_WORLD.Get_size()
+
+def mpi_sum(x):
+    return mpi_op(x, MPI.SUM)
+
+def mpi_avg(x):
+    """Average a scalar or vector over MPI processes."""
+    return mpi_sum(x) / num_procs()
 
 def gpu_count():
     """

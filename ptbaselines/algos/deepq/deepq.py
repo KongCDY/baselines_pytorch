@@ -147,10 +147,10 @@ def learn(env,
             if callback(locals(), globals()):
                 break
         # Take action and update exploration to the newest value
-        kwargs = {}
         if not param_noise:
             update_eps = exploration.value(t)
             update_param_noise_threshold = 0.
+            action = model.actions(torch_utils.toTensor(np.array(obs, dtype=np.float32)[None]), eps = update_eps)
         else:
             update_eps = 0.
             # Compute the threshold such that the KL divergence between perturbed and non-perturbed
@@ -158,10 +158,8 @@ def learn(env,
             # See Appendix C.1 in Parameter Space Noise for Exploration, Plappert et al., 2017
             # for detailed explanation.
             update_param_noise_threshold = -np.log(1. - exploration.value(t) + exploration.value(t) / float(env.action_space.n))
-            kwargs['reset'] = reset
-            kwargs['update_param_noise_threshold'] = update_param_noise_threshold
-            kwargs['update_param_noise_scale'] = True
-        action = model.actions(torch_utils.toTensor(np.array(obs, dtype=np.float32)[None]), eps = update_eps, **kwargs)
+            model.update_noise_scale(torch_utils.toTensor(np.array(obs, dtype=np.float32)[None]), update_param_noise_threshold)
+            action = model.actions_with_param_noise(torch_utils.toTensor(np.array(obs, dtype=np.float32)[None]), eps = update_eps, reset = reset)
         action = torch_utils.toNumpy(action)[0]
         env_action = action
         reset = False

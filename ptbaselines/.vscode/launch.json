@@ -10,12 +10,17 @@
             "request": "launch",
             "module": "ptbaselines.run",
             "args": [
-                "--alg", "deepq",
-                "--env", "PongNoFrameskip-v4",
-                "--num_timesteps", "1e7",
+                "--alg", "ddpg",
+                "--env", "LunarLanderContinuous-v2",
+                "--num_timesteps", "1e6",
                 "--log_path", "/home/sora/tmp/baselines_test",
                 "--save_path", "/home/sora/tmp/baselines_test",
-                "--learning_starts", "100"
+                "--normalize_returns", "True",
+                "--popart", "True"
+                // "--noise_type", "normal_0.2",
+                // "--noise_type", "none",
+                // "--play", "True",
+                // "--load_path", "/home/sora/tmp/baselines_test/model.pth"
             ]
         },
 
