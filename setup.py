@@ -31,7 +31,7 @@ setup(name='ptbaselines',
       packages=[package for package in find_packages()
                 if package.startswith('ptbaselines')],
       install_requires=[
-          'gym>=0.10.0, <1.0.0',
+          'gym==0.14.0',
           'scipy',
           'tqdm',
           'joblib',
@@ -49,13 +49,13 @@ setup(name='ptbaselines',
 
 
 # ensure there is some tensorflow build with version above 1.4
-import pkg_resources
-tf_pkg = None
-for tf_pkg_name in ['tensorflow', 'tensorflow-gpu', 'tf-nightly', 'tf-nightly-gpu']:
-    try:
-        tf_pkg = pkg_resources.get_distribution(tf_pkg_name)
-    except pkg_resources.DistributionNotFound:
-        pass
-assert tf_pkg is not None, 'TensorFlow needed, of version above 1.4'
-from distutils.version import LooseVersion
-assert LooseVersion(re.sub(r'-?rc\d+$', '', tf_pkg.version)) >= LooseVersion('1.4.0')
+#import pkg_resources
+#tf_pkg = None
+#for tf_pkg_name in ['tensorflow', 'tensorflow-gpu', 'tf-nightly', 'tf-nightly-gpu']:
+#    try:
+#        tf_pkg = pkg_resources.get_distribution(tf_pkg_name)
+#    except pkg_resources.DistributionNotFound:
+#        pass
+#assert tf_pkg is not None, 'TensorFlow needed, of version above 1.4'
+#from distutils.version import LooseVersion
+#assert LooseVersion(re.sub(r'-?rc\d+$', '', tf_pkg.version)) >= LooseVersion('1.4.0')
