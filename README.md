@@ -1,3 +1,27 @@
+# Pytorch Version
+pytorch version of baselines(some algorithms)
+
+## Installation
+- Clone the repo and cd into it:
+    ```bash
+    git clone https://github.com/KongCDY/baselines_pytorch.git
+    cd baselines_pytorch
+    ```
+- Install baselines package
+    ```bash
+    pip install -e .
+    ```
+## Test
+- Setup visdom in tmux
+    ```bash
+    python -m visdom.server
+    ```
+- Run example
+    ```bash
+    python -m ptbaselines.run --alg=ppo2 --env=CartPole-v1 --num_timesteps=1e6
+    ```
+- Open `http://localhost:8097` to see the curve
+
 **Status:** Maintenance (expect bug fixes and minor updates)
 
 <img src="data/logo.jpg" width=25% align="right" /> [![Build status](https://travis-ci.org/openai/baselines.svg?branch=master)](https://travis-ci.org/openai/baselines)
